@@ -769,61 +769,73 @@ def plot_distribution(returns, figsize=(10, 6),
         'A').apply(apply_fnc).resample('A').last()
     port['Yearly'].ffill(inplace=True)
 
-    fig, ax = _plt.subplots(figsize=figsize)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    fig = go.Figure()
+    # fig, ax = _plt.subplots(figsize=figsize)
+    # ax.spines['top'].set_visible(False)
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
 
-    fig.suptitle("Return Quantiles\n", y=.99,
-                 fontweight="bold", fontname=fontname,
-                 fontsize=14, color="black")
+    fig.update_layout(title="Return Quantiles\n")
+    # fig.suptitle("Return Quantiles\n", y=.99,
+    #              fontweight="bold", fontname=fontname,
+    #              fontsize=14, color="black")
 
     if subtitle:
-        ax.set_title("\n%s - %s                   " % (
+        fig.update_layout(title="Return Quantiles\n" + "\n%s - %s                   " % (
             returns.index.date[:1][0].strftime('%e %b \'%y'),
             returns.index.date[-1:][0].strftime('%e %b \'%y')
-        ), fontsize=12, color='gray')
+        ))
+        # ax.set_title("\n%s - %s                   " % (
+        #     returns.index.date[:1][0].strftime('%e %b \'%y'),
+        #     returns.index.date[-1:][0].strftime('%e %b \'%y')
+        # ), fontsize=12, color='gray')
 
-    fig.set_facecolor('white')
-    ax.set_facecolor('white')
+    # fig.set_facecolor('white')
+    # ax.set_facecolor('white')
+    # print(port)
+    fig.add_trace(go.Box(y=port['Daily'], name="Daily"))
+    fig.add_trace(go.Box(y=port['Weekly'], name="Weekly"))
+    fig.add_trace(go.Box(y=port['Monthly'], name="Monthly"))
+    fig.add_trace(go.Box(y=port['Quarterly'], name="Quarterly"))
+    fig.add_trace(go.Box(y=port['Yearly'], name="Yearly"))
+    # _sns.boxplot(data=port, ax=ax, palette=tuple(colors[:5]))
 
-    _sns.boxplot(data=port, ax=ax, palette=tuple(colors[:5]))
-
-    ax.yaxis.set_major_formatter(_plt.FuncFormatter(
-        lambda x, loc: "{:,}%".format(int(x * 100))))
+    # ax.yaxis.set_major_formatter(_plt.FuncFormatter(
+    #     lambda x, loc: "{:,}%".format(int(x * 100))))
 
     if ylabel:
-        ax.set_ylabel('Rerurns', fontname=fontname,
-                      fontweight='bold', fontsize=12, color="black")
-        ax.yaxis.set_label_coords(-.1, .5)
+        fig.update_layout(yaxis_title="Reruns")
+        # ax.set_ylabel('Rerurns', fontname=fontname,
+        #               fontweight='bold', fontsize=12, color="black")
+        # ax.yaxis.set_label_coords(-.1, .5)
 
-    fig.autofmt_xdate()
-
-    try:
-        _plt.subplots_adjust(hspace=0)
-    except Exception:
-        pass
-    try:
-        fig.tight_layout(w_pad=0, h_pad=0)
-    except Exception:
-        pass
-
-    if savefig:
-        if isinstance(savefig, dict):
-            _plt.savefig(**savefig)
-        else:
-            _plt.savefig(savefig)
-
-    if show:
-        _plt.show(block=False)
-
-    _plt.close()
+    # fig.autofmt_xdate()
+    #
+    # try:
+    #     _plt.subplots_adjust(hspace=0)
+    # except Exception:
+    #     pass
+    # try:
+    #     fig.tight_layout(w_pad=0, h_pad=0)
+    # except Exception:
+    #     pass
+    #
+    # if savefig:
+    #     if isinstance(savefig, dict):
+    #         _plt.savefig(**savefig)
+    #     else:
+    #         _plt.savefig(savefig)
+    #
+    # if show:
+    #     _plt.show(block=False)
+    #
+    # _plt.close()
 
     if not show:
         return fig
 
-    return None
+    return fig
 
 
 def plot_table(tbl, columns=None, title="", title_loc="left",
