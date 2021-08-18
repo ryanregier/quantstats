@@ -661,60 +661,64 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
     if cbar:
         figsize = (figsize[0] * 1.04, max([fig_height, figsize[1]]))
 
-    fig, ax = _plt.subplots(figsize=figsize)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-
-    fig.set_facecolor('white')
-    ax.set_facecolor('white')
-
-    ax.set_title('      Monthly Returns (%)\n', fontsize=14, y=.995,
-                 fontname=fontname, fontweight='bold', color='black')
+    fig = go.Figure()
+    # fig, ax = _plt.subplots(figsize=figsize)
+    # ax.spines['top'].set_visible(False)
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
+    #
+    # fig.set_facecolor('white')
+    # ax.set_facecolor('white')
+    fig.update_layout(title='      Monthly Returns (%)\n')
+    # ax.set_title('      Monthly Returns (%)\n', fontsize=14, y=.995,
+    #              fontname=fontname, fontweight='bold', color='black')
 
     # _sns.set(font_scale=.9)
-    ax = _sns.heatmap(returns, ax=ax, annot=True, center=0,
-                      annot_kws={"size": annot_size},
-                      fmt="0.2f", linewidths=0.5,
-                      square=square, cbar=cbar, cmap=cmap,
-                      cbar_kws={'format': '%.0f%%'})
+    fig.add_trace(go.Heatmap(z=returns))
+    # ax = _sns.heatmap(returns, ax=ax, annot=True, center=0,
+    #                   annot_kws={"size": annot_size},
+    #                   fmt="0.2f", linewidths=0.5,
+    #                   square=square, cbar=cbar, cmap=cmap,
+    #                   cbar_kws={'format': '%.0f%%'})
     # _sns.set(font_scale=1)
 
     # align plot to match other
     if ylabel:
-        ax.set_ylabel('Years', fontname=fontname,
-                      fontweight='bold', fontsize=12)
-        ax.yaxis.set_label_coords(-.1, .5)
+        fig.update_layout(yaxis_title="Years")
+        # ax.set_ylabel('Years', fontname=fontname,
+        #               fontweight='bold', fontsize=12)
+        # ax.yaxis.set_label_coords(-.1, .5)
 
-    ax.tick_params(colors="#808080")
-    _plt.xticks(rotation=0, fontsize=annot_size * 1.2)
-    _plt.yticks(rotation=0, fontsize=annot_size * 1.2)
+    # ax.tick_params(colors="#808080")
+    # TODO: maybe important
+    # _plt.xticks(rotation=0, fontsize=annot_size * 1.2)
+    # _plt.yticks(rotation=0, fontsize=annot_size * 1.2)
 
-    try:
-        _plt.subplots_adjust(hspace=0, bottom=0, top=1)
-    except Exception:
-        pass
-    try:
-        fig.tight_layout(w_pad=0, h_pad=0)
-    except Exception:
-        pass
-
-    if savefig:
-        if isinstance(savefig, dict):
-            _plt.savefig(**savefig)
-        else:
-            _plt.savefig(savefig)
-
-    if show:
-        _plt.show(block=False)
-
-    # _plt.close()
+    # try:
+    #     _plt.subplots_adjust(hspace=0, bottom=0, top=1)
+    # except Exception:
+    #     pass
+    # try:
+    #     fig.tight_layout(w_pad=0, h_pad=0)
+    # except Exception:
+    #     pass
+    #
+    # if savefig:
+    #     if isinstance(savefig, dict):
+    #         _plt.savefig(**savefig)
+    #     else:
+    #         _plt.savefig(savefig)
+    #
+    # if show:
+    #     _plt.show(block=False)
+    #
+    # # _plt.close()
 
     if not show:
         return fig
 
-    return None
+    return fig
 
 
 def monthly_returns(returns, annot_size=10, figsize=(10, 5),

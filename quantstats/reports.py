@@ -575,7 +575,7 @@ def plots(returns, benchmark=None, grayscale=False,
     fig = _plots.histogram(returns, grayscale=grayscale,
                      figsize=(figsize[0], figsize[0] * .5),
                      show=False, ylabel=False)
-    # fig.show()
+    fig.show()
     fig_list.append(fig)
 
     fig = _plots.daily_returns(returns, grayscale=grayscale,
@@ -600,6 +600,7 @@ def plots(returns, benchmark=None, grayscale=False,
     fig = _plots.rolling_sharpe(returns, grayscale=grayscale,
                                 figsize=(figsize[0], figsize[0] * .3),
                                 show=False, ylabel=False, period=win_half_year)
+    # fig.show()
     fig_list.append(fig)
 
     fig = _plots.rolling_sortino(returns, grayscale=grayscale,
@@ -623,14 +624,15 @@ def plots(returns, benchmark=None, grayscale=False,
     fig = _plots.monthly_heatmap(returns, grayscale=grayscale,
                            figsize=(figsize[0], figsize[0] * .5),
                            show=False, ylabel=False)
+    # fig.show()
     fig_list.append(fig)
 
     fig = _plots.distribution(returns, grayscale=grayscale,
                         figsize=(figsize[0], figsize[0] * .5),
                         show=False, ylabel=False)
-    fig.show()
+    # fig.show()
     fig_list.append(fig)
-    # print(len(fig_list))
+    # print(len(fig_list))l
     return fig_list
 
 

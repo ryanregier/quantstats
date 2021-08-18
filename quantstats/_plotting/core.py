@@ -19,6 +19,7 @@
 # limitations under the License.
 import pandas as pd
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 import plotly
 import plotly.figure_factory as ff
 import matplotlib.pyplot as _plt
@@ -372,92 +373,94 @@ def plot_histogram(returns, resample="M", bins=20,
         apply_fnc).resample(resample).last()
 
     fig = go.Figure()
-    fig, ax = _plt.subplots(figsize=figsize)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    # fig = make_subplots(rows=2, rows=1, shared_xaxes=True, shared_yaxes=True)
+    # fig, ax = _plt.subplots(figsize=figsize)
+    # ax.spines['top'].set_visible(False)
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
 
-    # fig.update_layout(title=title + "\n")
-    fig.suptitle(title + "\n", y=.99, fontweight="bold", fontname=fontname,
-                 fontsize=14, color="black")
+    fig.update_layout(title=title + "\n")
+    # fig.suptitle(title + "\n", y=.99, fontweight="bold", fontname=fontname,
+    #              fontsize=14, color="black")
 
     if subtitle:
-        # fig.update_layout(title=title + "\n" + "\n%s - %s                   " % (
-        #     returns.index.date[:1][0].strftime('%Y'),
-        #     returns.index.date[-1:][0].strftime('%Y')
-        # ))
-        ax.set_title("\n%s - %s                   " % (
+        fig.update_layout(title=title + "\n" + "\n%s - %s                   " % (
             returns.index.date[:1][0].strftime('%Y'),
             returns.index.date[-1:][0].strftime('%Y')
-        ), fontsize=12, color='gray')
+        ))
+        # ax.set_title("\n%s - %s                   " % (
+        #     returns.index.date[:1][0].strftime('%Y'),
+        #     returns.index.date[-1:][0].strftime('%Y')
+        # ), fontsize=12, color='gray')
 
     # fig.set_facecolor('white')
     # ax.set_facecolor('white')
-    # fig.add_vline(x=returns.mean(), line_dash="dash", line_color=colors[2], annotation_text="Average",
-    #               annotation_position="top left")
-    ax.axvline(returns.mean(), ls="--", lw=1.5,
-               color=colors[2], zorder=2, label="Average")
+    fig.add_vline(x=returns.mean(), line_dash="dash", line_color=colors[2], annotation_text="Average",
+                  annotation_position="top left")
+    # ax.axvline(returns.mean(), ls="--", lw=1.5,
+    #            color=colors[2], zorder=2, label="Average")
     df = pd.DataFrame()
     df['date'] = returns.index
     df['value'] = returns.tolist()
-    # fig.add_trace(
-    #     px.histogram(df, x='date', y='value', histfunc="avg")
-    # )
-    _sns.histplot(returns, bins=bins,
-                  color=colors[0],
-                  alpha=1,
-                  kde=kde,
-                  stat="density",
-                  ax=ax)
-    _sns.kdeplot(returns, color='black', linewidth=1.5)
+    # print(df['date'])
+    fig.add_trace(
+        go.Bar(x=df['date'], y=df['value'])
+    )
+    # _sns.histplot(returns, bins=bins,
+    #               color=colors[0],
+    #               alpha=1,
+    #               kde=kde,
+    #               stat="density",
+    #               ax=ax)
+    # _sns.kdeplot(returns, color='black', linewidth=1.5)
+    #
+    # ax.xaxis.set_major_formatter(_plt.FuncFormatter(
+    #     lambda x, loc: "{:,}%".format(int(x * 100))))
 
-    ax.xaxis.set_major_formatter(_plt.FuncFormatter(
-        lambda x, loc: "{:,}%".format(int(x * 100))))
+    fig.add_hline(y=0.01, line_color="#000000")
+    # ax.axhline(0.01, lw=1, color="#000000", zorder=2)
+    fig.add_vline(x=0, line_color="#000000")
+    # ax.axvline(0, lw=1, color="#000000", zorder=2)
 
-    # fig.add_hline(y=0.01, line_color="#000000")
-    ax.axhline(0.01, lw=1, color="#000000", zorder=2)
-    # fig.add_vline(x=0, line_color="#000000")
-    ax.axvline(0, lw=1, color="#000000", zorder=2)
-
-    # fig.update_layout(xaxis_title='')
-    ax.set_xlabel('')
+    fig.update_layout(xaxis_title='')
+    # ax.set_xlabel('')
     if ylabel:
-        # fig.update_layout(yaxis_title="Occurrences")
-        ax.set_ylabel("Occurrences", fontname=fontname,
-                      fontweight='bold', fontsize=12, color="black")
-        ax.yaxis.set_label_coords(-.1, .5)
+        fig.update_layout(yaxis_title="Occurrences")
+        # ax.set_ylabel("Occurrences", fontname=fontname,
+        #               fontweight='bold', fontsize=12, color="black")
+        # ax.yaxis.set_label_coords(-.1, .5)
 
-    ax.legend(fontsize=12)
+    # ax.legend(fontsize=12)
 
-    fig.autofmt_xdate()
+    # fig.autofmt_xdate()
 
-    try:
-        _plt.subplots_adjust(hspace=0, bottom=0, top=1)
-    except Exception:
-        pass
-
-    try:
-        fig.tight_layout()
-    except Exception:
-        pass
-
-    if savefig:
-        if isinstance(savefig, dict):
-            _plt.savefig(**savefig)
-        else:
-            _plt.savefig(savefig)
-        pass
+    # try:
+    #     _plt.subplots_adjust(hspace=0, bottom=0, top=1)
+    # except Exception:
+    #     pass
+    #
+    # try:
+    #     fig.tight_layout()
+    # except Exception:
+    #     pass
+    #
+    # if savefig:
+    #     if isinstance(savefig, dict):
+    #         _plt.savefig(**savefig)
+    #     else:
+    #         _plt.savefig(savefig)
+    #     pass
 
     if show:
         fig.show()
 
-    _plt.close()
+    # _plt.close()
 
     if not show:
         return fig
 
-    return None
+    return fig
 
 
 def plot_rolling_stats(returns, benchmark=None, title="",
