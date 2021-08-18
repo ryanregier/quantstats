@@ -41,7 +41,7 @@ except ImportError:
 
 
 def _get_trading_periods(trading_year_days=252):
-    half_year = _ceil(trading_year_days/2)
+    half_year = _ceil(trading_year_days / 2)
     return trading_year_days, half_year
 
 
@@ -49,7 +49,6 @@ def html(returns, benchmark=None, rf=0., grayscale=False,
          title='Strategy Tearsheet', output=None, compounded=True,
          trading_year_days=252, download_filename='quantstats-tearsheet.html',
          figfmt='svg', template_path=None):
-
     win_year, win_half_year = _get_trading_periods(trading_year_days)
 
     if output is None and not _utils._in_notebook():
@@ -224,13 +223,13 @@ def html(returns, benchmark=None, rf=0., grayscale=False,
 def full(returns, benchmark=None, rf=0., grayscale=False,
          figsize=(8, 5), display=True, compounded=True,
          trading_year_days=252):
-
+    tear_sheet = None
     dd = _stats.to_drawdown_series(returns)
     dd_info = _stats.drawdown_details(dd).sort_values(
         by='max drawdown', ascending=True)[:5]
 
     if not dd_info.empty:
-        dd_info.index = range(1, min(6, len(dd_info)+1))
+        dd_info.index = range(1, min(6, len(dd_info) + 1))
         dd_info.columns = map(lambda x: str(x).title(), dd_info.columns)
 
     if _utils._in_notebook():
@@ -246,29 +245,38 @@ def full(returns, benchmark=None, rf=0., grayscale=False,
 
         iDisplay(iHTML('<h4>Strategy Visualization</h4>'))
     else:
-        print('[Performance Metrics]\n')
-        metrics(returns=returns, benchmark=benchmark,
+        tear_sheet = ''
+        tear_sheet += '[Performance Metrics]\n'
+        # print('[Performance Metrics]\n')
+        performance_metrics = metrics(returns=returns, benchmark=benchmark,
                 rf=rf, display=display, mode='full',
                 compounded=compounded)
-        print('\n\n')
-        print('[5 Worst Drawdowns]\n')
+        tear_sheet += performance_metrics
+        tear_sheet += '\n\n'
+        # print('[5 Worst Drawdowns]\n')
+        tear_sheet += '[5 Worst Drawdowns]\n'
         if dd_info.empty:
-            print("(no drawdowns)")
+            tear_sheet += "(no drawdowns)"
+            # print("(no drawdowns)")
         else:
-            print(_tabulate(dd_info, headers="keys",
-                            tablefmt='simple', floatfmt=".2f"))
-        print('\n\n')
-        print('[Strategy Visualization]\nvia Matplotlib')
+            drawdowns = _tabulate(dd_info, headers="keys",
+                            tablefmt='simple', floatfmt=".2f")
+            tear_sheet += drawdowns
+            # print(_tabulate(dd_info, headers="keys",
+            #                 tablefmt='simple', floatfmt=".2f"))
+        # print('\n\n')
+        tear_sheet += '\n\n'
+        # print('[Strategy Visualization]\nvia Matplotlib')
 
-    plots(returns=returns, benchmark=benchmark,
+    figs = plots(returns=returns, benchmark=benchmark,
           grayscale=grayscale, figsize=figsize, mode='full',
           trading_year_days=trading_year_days)
+    return tear_sheet, figs
 
 
 def basic(returns, benchmark=None, rf=0., grayscale=False,
           figsize=(8, 5), display=True, compounded=True,
           trading_year_days=252):
-
     if _utils._in_notebook():
         iDisplay(iHTML('<h4>Performance Metrics</h4>'))
         metrics(returns=returns, benchmark=benchmark,
@@ -292,7 +300,6 @@ def basic(returns, benchmark=None, rf=0., grayscale=False,
 def metrics(returns, benchmark=None, rf=0., display=True,
             mode='basic', sep=False, compounded=True,
             trading_year_days=252, **kwargs):
-
     win_year, _ = _get_trading_periods(trading_year_days)
 
     if isinstance(returns, _pd.DataFrame) and len(returns.columns) > 1:
@@ -346,7 +353,7 @@ def metrics(returns, benchmark=None, rf=0., display=True,
 
     if compounded:
         metrics['Cumulative Return %'] = (
-            _stats.comp(df) * pct).map('{:,.2f}'.format)
+                _stats.comp(df) * pct).map('{:,.2f}'.format)
     else:
         metrics['Total Return %'] = (df.sum() * pct).map('{:,.2f}'.format)
 
@@ -414,27 +421,27 @@ def metrics(returns, benchmark=None, rf=0., display=True,
     metrics['MTD %'] = comp_func(
         df[df.index >= _dt(today.year, today.month, 1)]) * pct
 
-    d = today - _td(3*365/12)
+    d = today - _td(3 * 365 / 12)
     metrics['3M %'] = comp_func(
         df[df.index >= _dt(d.year, d.month, d.day)]) * pct
 
-    d = today - _td(6*365/12)
+    d = today - _td(6 * 365 / 12)
     metrics['6M %'] = comp_func(
         df[df.index >= _dt(d.year, d.month, d.day)]) * pct
 
     metrics['YTD %'] = comp_func(df[df.index >= _dt(today.year, 1, 1)]) * pct
 
-    d = today - _td(12*365/12)
+    d = today - _td(12 * 365 / 12)
     metrics['1Y %'] = comp_func(
         df[df.index >= _dt(d.year, d.month, d.day)]) * pct
     metrics['3Y (ann.) %'] = _stats.cagr(
-        df[df.index >= _dt(today.year-3, today.month, today.day)
+        df[df.index >= _dt(today.year - 3, today.month, today.day)
            ], 0., compounded) * pct
     metrics['5Y (ann.) %'] = _stats.cagr(
-        df[df.index >= _dt(today.year-5, today.month, today.day)
+        df[df.index >= _dt(today.year - 5, today.month, today.day)
            ], 0., compounded) * pct
     metrics['10Y (ann.) %'] = _stats.cagr(
-        df[df.index >= _dt(today.year-10, today.month, today.day)
+        df[df.index >= _dt(today.year - 10, today.month, today.day)
            ], 0., compounded) * pct
     metrics['All-time (ann.) %'] = _stats.cagr(df, 0., compounded) * pct
 
@@ -490,7 +497,7 @@ def metrics(returns, benchmark=None, rf=0., display=True,
         if display or "internal" in kwargs:
             metrics['Longest DD Days'] = metrics['Longest DD Days'].astype(str)
             metrics['Avg. Drawdown Days'] = metrics['Avg. Drawdown Days'
-                                                    ].astype(str)
+            ].astype(str)
     except Exception:
         metrics['Longest DD Days'] = '-'
         metrics['Avg. Drawdown Days'] = '-'
@@ -510,8 +517,10 @@ def metrics(returns, benchmark=None, rf=0., display=True,
         metrics.columns = ['Strategy']
 
     if display:
-        print(_tabulate(metrics, headers="keys", tablefmt='simple'))
-        return None
+        performance_metrics = _tabulate(metrics, headers="keys", tablefmt='simple')
+        # print(test)
+        # print(_tabulate(metrics, headers="keys", tablefmt='simple'))
+        return performance_metrics
 
     if not sep:
         metrics = metrics[metrics.index != '']
@@ -521,82 +530,103 @@ def metrics(returns, benchmark=None, rf=0., display=True,
 def plots(returns, benchmark=None, grayscale=False,
           figsize=(8, 5), mode='basic', compounded=True,
           trading_year_days=252):
-
     win_year, win_half_year = _get_trading_periods(trading_year_days)
-
+    fig_list = []
     if mode.lower() != 'full':
-        _plots.snapshot(returns, grayscale=grayscale,
-                        figsize=(figsize[0], figsize[0]),
-                        show=True, mode=("comp" if compounded else "sum"))
+        fig = _plots.snapshot(returns, grayscale=grayscale,
+                              figsize=(figsize[0], figsize[0]),
+                              show=False, mode=("comp" if compounded else "sum"))
+        fig_list.append(fig)
 
-        _plots.monthly_heatmap(returns, grayscale=grayscale,
-                               figsize=(figsize[0], figsize[0]*.5),
-                               show=True, ylabel=False,
-                               compounded=compounded)
+        fig = _plots.monthly_heatmap(returns, grayscale=grayscale,
+                                     figsize=(figsize[0], figsize[0] * .5),
+                                     show=False, ylabel=False,
+                                     compounded=compounded)
+        fig_list.append(fig)
+        # print(len(fig_list))
+        # print(fig_list)
+        fig_list[0].show()
 
-        return
+        return fig_list
 
-    _plots.returns(returns, benchmark, grayscale=grayscale,
-                   figsize=(figsize[0], figsize[0]*.6),
-                   show=True, ylabel=False)
-
-    _plots.log_returns(returns, benchmark, grayscale=grayscale,
-                       figsize=(figsize[0], figsize[0]*.5),
-                       show=True, ylabel=False)
-
+    fig = _plots.returns(returns, benchmark, grayscale=grayscale,
+                         figsize=(figsize[0], figsize[0] * .6),
+                         show=False, ylabel=False)
+    # fig.show()
+    fig_list.append(fig)
+    fig = _plots.log_returns(returns, benchmark, grayscale=grayscale,
+                             figsize=(figsize[0], figsize[0] * .5),
+                             show=False, ylabel=False)
+    # fig.show()
+    fig_list.append(fig)
     if benchmark is not None:
         _plots.returns(returns, benchmark, match_volatility=True,
                        grayscale=grayscale,
-                       figsize=(figsize[0], figsize[0]*.5),
+                       figsize=(figsize[0], figsize[0] * .5),
                        show=True, ylabel=False)
 
-    _plots.yearly_returns(returns, benchmark,
+    fig = _plots.yearly_returns(returns, benchmark,
                           grayscale=grayscale,
-                          figsize=(figsize[0], figsize[0]*.5),
-                          show=True, ylabel=False)
+                          figsize=(figsize[0], figsize[0] * .5),
+                          show=False, ylabel=False)
+    # fig.show()
+    fig_list.append(fig)
 
-    _plots.histogram(returns, grayscale=grayscale,
-                     figsize=(figsize[0], figsize[0]*.5),
-                     show=True, ylabel=False)
+    fig = _plots.histogram(returns, grayscale=grayscale,
+                     figsize=(figsize[0], figsize[0] * .5),
+                     show=False, ylabel=False)
+    fig.show()
+    fig_list.append(fig)
 
-    _plots.daily_returns(returns, grayscale=grayscale,
-                         figsize=(figsize[0], figsize[0]*.3),
-                         show=True, ylabel=False)
+    fig = _plots.daily_returns(returns, grayscale=grayscale,
+                         figsize=(figsize[0], figsize[0] * .3),
+                         show=False, ylabel=False)
+    # fig.show()
+    fig_list.append(fig)
 
     if benchmark is not None:
         _plots.rolling_beta(returns, benchmark, grayscale=grayscale,
                             window1=win_year, window2=win_half_year,
-                            figsize=(figsize[0], figsize[0]*.3),
+                            figsize=(figsize[0], figsize[0] * .3),
                             show=True, ylabel=False)
 
-    _plots.rolling_volatility(
+    fig = _plots.rolling_volatility(
         returns, benchmark, grayscale=grayscale,
-        figsize=(figsize[0], figsize[0]*.3), show=True, ylabel=False,
+        figsize=(figsize[0], figsize[0] * .3), show=False, ylabel=False,
         period=win_half_year)
+    fig_list.append(fig)
 
-    _plots.rolling_sharpe(returns, grayscale=grayscale,
-                          figsize=(figsize[0], figsize[0]*.3),
-                          show=True, ylabel=False, period=win_half_year)
+    fig = _plots.rolling_sharpe(returns, grayscale=grayscale,
+                                figsize=(figsize[0], figsize[0] * .3),
+                                show=False, ylabel=False, period=win_half_year)
+    fig_list.append(fig)
 
-    _plots.rolling_sortino(returns, grayscale=grayscale,
-                           figsize=(figsize[0], figsize[0]*.3),
-                           show=True, ylabel=False, period=win_half_year)
+    fig = _plots.rolling_sortino(returns, grayscale=grayscale,
+                           figsize=(figsize[0], figsize[0] * .3),
+                           show=False, ylabel=False, period=win_half_year)
+    fig_list.append(fig)
 
-    _plots.drawdowns_periods(returns, grayscale=grayscale,
-                             figsize=(figsize[0], figsize[0]*.5),
-                             show=True, ylabel=False)
+    fig = _plots.drawdowns_periods(returns, grayscale=grayscale,
+                             figsize=(figsize[0], figsize[0] * .5),
+                             show=False, ylabel=False)
+    fig_list.append(fig)
 
-    _plots.drawdown(returns, grayscale=grayscale,
-                    figsize=(figsize[0], figsize[0]*.4),
-                    show=True, ylabel=False)
+    fig = _plots.drawdown(returns, grayscale=grayscale,
+                    figsize=(figsize[0], figsize[0] * .4),
+                    show=False, ylabel=False)
+    fig_list.append(fig)
 
-    _plots.monthly_heatmap(returns, grayscale=grayscale,
-                           figsize=(figsize[0], figsize[0]*.5),
-                           show=True, ylabel=False)
+    fig = _plots.monthly_heatmap(returns, grayscale=grayscale,
+                           figsize=(figsize[0], figsize[0] * .5),
+                           show=False, ylabel=False)
+    fig_list.append(fig)
 
-    _plots.distribution(returns, grayscale=grayscale,
-                        figsize=(figsize[0], figsize[0]*.5),
-                        show=True, ylabel=False)
+    fig = _plots.distribution(returns, grayscale=grayscale,
+                        figsize=(figsize[0], figsize[0] * .5),
+                        show=False, ylabel=False)
+    fig_list.append(fig)
+    # print(len(fig_list))
+    return fig_list
 
 
 def _calc_dd(df, display=True):

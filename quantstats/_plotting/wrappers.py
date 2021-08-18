@@ -20,6 +20,9 @@
 
 import warnings
 import matplotlib.pyplot as _plt
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from matplotlib.ticker import (
     StrMethodFormatter as _StrMethodFormatter,
     FuncFormatter as _FuncFormatter
@@ -35,7 +38,6 @@ from .. import (
 
 from . import core as _core
 
-
 _FLATUI_COLORS = ["#fedd78", "#348dc1", "#af4b64",
                   "#4fa487", "#9b59b6", "#808080"]
 _GRAYSCALE_COLORS = (len(_FLATUI_COLORS) * ['black']) + ['white']
@@ -43,6 +45,7 @@ _GRAYSCALE_COLORS = (len(_FLATUI_COLORS) * ['black']) + ['white']
 _HAS_PLOTLY = False
 try:
     import plotly
+
     _HAS_PLOTLY = True
 except ImportError:
     pass
@@ -61,41 +64,59 @@ def to_plotly(fig):
 def snapshot(returns, grayscale=False, figsize=(10, 8),
              title='Portfolio Summary', fontname='Arial', lw=1.5,
              mode="comp", subtitle=True, savefig=None, show=True):
-
     colors = _GRAYSCALE_COLORS if grayscale else _FLATUI_COLORS
 
     returns = _utils.make_portfolio(returns, 1, mode).pct_change().fillna(0)
 
     if figsize is None:
         size = list(_plt.gcf().get_size_inches())
-        figsize = (size[0], size[0]*.75)
+        figsize = (size[0], size[0] * .75)
 
-    fig, axes = _plt.subplots(3, 1, sharex=True, figsize=figsize,
-                              gridspec_kw={'height_ratios': [3, 1, 1]})
+    # fig, axes = _plt.subplots(3, 1, sharex=True, figsize=figsize,
+    #                           gridspec_kw={'height_ratios': [3, 1, 1]})
+    fig = make_subplots(rows=3, cols=1,
+                               shared_xaxes=True,
+                               vertical_spacing=0.02, subplot_titles=("Plot 1"))
+    # TODO: figure out wtf this is
+    # for ax in axes:
+    #     ax.spines['top'].set_visible(False)
+    #     ax.spines['right'].set_visible(False)
+    #     ax.spines['bottom'].set_visible(False)
+    #     ax.spines['left'].set_visible(False)
+    fig.update_layout(title_text="Portfolio Snapshot")
+    # fig.suptitle(title, fontsize=14, y=.995,
+    #              fontname=fontname, fontweight='bold', color='black')
 
-    for ax in axes:
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
-        ax.spines['left'].set_visible(False)
-
-    fig.suptitle(title, fontsize=14, y=.995,
-                 fontname=fontname, fontweight='bold', color='black')
-
-    fig.set_facecolor('white')
+    # TODO: wtf is this
+    # fig.set_facecolor('white')
 
     if subtitle:
-        axes[0].set_title("\n%s - %s ;  Sharpe: %.2f                      " % (
+        # axes[0].set_title("\n%s - %s ;  Sharpe: %.2f                      " % (
+        #     returns.index.date[:1][0].strftime('%e %b \'%y'),
+        #     returns.index.date[-1:][0].strftime('%e %b \'%y'),
+        #     _stats.sharpe(returns)
+        # ), fontsize=12, color='gray')
+        fig.layout.annotations[0].update(text="\n%s - %s ;  Sharpe: %.2f                      " % (
             returns.index.date[:1][0].strftime('%e %b \'%y'),
             returns.index.date[-1:][0].strftime('%e %b \'%y'),
-            _stats.sharpe(returns)
-        ), fontsize=12, color='gray')
+            _stats.sharpe(returns)))
 
-    axes[0].set_ylabel('Cumulative Return', fontname=fontname,
-                       fontweight='bold', fontsize=12)
-    axes[0].plot(_stats.compsum(returns) * 100, color=colors[1],
-                 lw=1 if grayscale else lw, zorder=1)
-    axes[0].axhline(0, color='silver', lw=1, zorder=0)
+    # axes[0].set_ylabel('Cumulative Return', fontname=fontname,
+    #                    fontweight='bold', fontsize=12)
+    series = _stats.compsum(returns) * 100
+    df = pd.DataFrame()
+    df['Date'] = series.index
+    df['Value'] = series.tolist()
+    df.reset_index(drop=True, inplace=True)
+    # print(df)
+    fig.add_trace(go.Scatter(name="Cumulative Return", x=df['Date'], y=df['Value']), row=1, col=1)
+    fig['layout']['yaxis']['title'] = 'Cumulative Return'
+    # axes[0].plot(_stats.compsum(returns) * 100, color=colors[1],
+    #              lw=1 if grayscale else lw, zorder=1)
+    fig.add_hline(y=0, line_dash="dot", row=1, col="all")
+    fig.add_hline(y=0, line_dash="dot", row=2, col="all")
+    fig.add_hline(y=0, line_dash="dot", row=3, col="all")
+    # axes[0].axhline(0, color='silver', lw=1, zorder=0)
 
     dd = _stats.to_drawdown_series(returns) * 100
     ddmin = _utils._round_to_closest(abs(dd.min()), 5)
@@ -107,19 +128,38 @@ def snapshot(returns, grayscale=False, figsize=(10, 8),
     ddmin_ticks = int(_utils._round_to_closest(ddmin_ticks, 5))
 
     # ddmin_ticks = int(_utils._round_to_closest(ddmin, 5))
-    axes[1].set_ylabel('Drawdown', fontname=fontname,
-                       fontweight='bold', fontsize=12)
-    axes[1].set_yticks(_np.arange(-ddmin, 0, step=ddmin_ticks))
-    axes[1].plot(dd, color=colors[2], lw=1 if grayscale else 1, zorder=1)
-    axes[1].axhline(0, color='silver', lw=1, zorder=0)
-    if not grayscale:
-        axes[1].fill_between(dd.index, 0, dd, color=colors[2], alpha=.1)
 
-    axes[2].set_ylabel('Daily Return', fontname=fontname,
-                       fontweight='bold', fontsize=12)
-    axes[2].plot(returns * 100, color=colors[0], lw=0.5, zorder=1)
-    axes[2].axhline(0, color='silver', lw=1, zorder=0)
-    axes[2].axhline(0, color=colors[-1], linestyle='--', lw=1, zorder=2)
+    fig['layout']['yaxis2']['title'] = 'Drawdown'
+    # axes[1].set_ylabel('Drawdown', fontname=fontname,
+    #                    fontweight='bold', fontsize=12)
+    fig['layout']['yaxis2']['tick0'] = 0
+    fig['layout']['yaxis2']['dtick'] = ddmin_ticks
+    # axes[1].set_yticks(_np.arange(-ddmin, 0, step=ddmin_ticks))
+    series = dd
+    df = pd.DataFrame()
+    df['Date'] = series.index
+    df['Value'] = series.tolist()
+    df.reset_index(drop=True, inplace=True)
+    fig.add_trace(go.Scatter(name="Drawdown", x=df['Date'], y=df['Value']), row=2, col=1)
+    # axes[1].plot(dd, color=colors[2], lw=1 if grayscale else 1, zorder=1)
+    #TODO: figure out how to add horizontal lines to the subplots
+    # axes[1].axhline(0, color='silver', lw=1, zorder=0)
+    # if not grayscale:
+    #     axes[1].fill_between(dd.index, 0, dd, color=colors[2], alpha=.1)
+
+    fig['layout']['yaxis2']['title'] = 'Drawdown'
+    # axes[2].set_ylabel('Daily Return', fontname=fontname,
+    #                    fontweight='bold', fontsize=12)
+    series = returns * 100
+    df = pd.DataFrame()
+    df['Date'] = series.index
+    df['Value'] = series.tolist()
+    df.reset_index(drop=True, inplace=True)
+    fig.add_trace(go.Scatter(name="Daily Return", x=df['Date'], y=df['Value']), row=3, col=1)
+    # axes[2].plot(returns * 100, color=colors[0], lw=0.5, zorder=1
+    # TODO: figure out how to add horizontal lines to the subplots
+    # axes[2].axhline(0, color='silver', lw=1, zorder=0)
+    # axes[2].axhline(0, color=colors[-1], linestyle='--', lw=1, zorder=2)
 
     retmax = _utils._round_to_closest(returns.max() * 100, 5)
     retmin = _utils._round_to_closest(returns.min() * 100, 5)
@@ -130,35 +170,39 @@ def snapshot(returns, grayscale=False, figsize=(10, 8),
     elif retdiff > 30:
         steps = retdiff / 4
     steps = int(_utils._round_to_closest(steps, 5))
-    axes[2].set_yticks(_np.arange(retmin, retmax, step=steps))
+    fig['layout']['yaxis3']['tick0'] = retmin
+    fig['layout']['yaxis3']['dtick'] = steps
+    fig['layout']['yaxis3']['title'] = 'Daily Return'
+    # axes[2].set_yticks(_np.arange(retmin, retmax, step=steps))
 
-    for ax in axes:
-        ax.set_facecolor('white')
-        ax.yaxis.set_label_coords(-.1, .5)
-        ax.yaxis.set_major_formatter(_StrMethodFormatter('{x:,.0f}%'))
+    # TODO: look into this later
+    # for ax in axes:
+    #     ax.set_facecolor('white')
+    #     ax.yaxis.set_label_coords(-.1, .5)
+    #     ax.yaxis.set_major_formatter(_StrMethodFormatter('{x:,.0f}%'))
 
-    _plt.subplots_adjust(hspace=0, bottom=0, top=1)
-    fig.autofmt_xdate()
+    # _plt.subplots_adjust(hspace=0, bottom=0, top=1)
+    # fig.autofmt_xdate()
 
-    try:
-        _plt.subplots_adjust(hspace=0)
-    except Exception:
-        pass
-    try:
-        fig.tight_layout(w_pad=0, h_pad=0)
-    except Exception:
-        pass
-
-    if savefig:
-        if isinstance(savefig, dict):
-            _plt.savefig(**savefig)
-        else:
-            _plt.savefig(savefig)
-
-    if show:
-        _plt.show(block=False)
-
-    _plt.close()
+    # try:
+    #     _plt.subplots_adjust(hspace=0)
+    # except Exception:
+    #     pass
+    # try:
+    #     fig.tight_layout(w_pad=0, h_pad=0)
+    # except Exception:
+    #     pass
+    #
+    # if savefig:
+    #     if isinstance(savefig, dict):
+    #         _plt.savefig(**savefig)
+    #     else:
+    #         _plt.savefig(savefig)
+    #
+    # if show:
+    #     _plt.show(block=False)
+    #
+    # _plt.close()
 
     if not show:
         return fig
@@ -171,7 +215,6 @@ def earnings(returns, start_balance=1e5, mode="comp",
              title='Portfolio Earnings',
              fontname='Arial', lw=1.5,
              subtitle=True, savefig=None, show=True):
-
     colors = _GRAYSCALE_COLORS if grayscale else _FLATUI_COLORS
     alpha = .5 if grayscale else .8
 
@@ -179,66 +222,79 @@ def earnings(returns, start_balance=1e5, mode="comp",
 
     if figsize is None:
         size = list(_plt.gcf().get_size_inches())
-        figsize = (size[0], size[0]*.55)
+        figsize = (size[0], size[0] * .55)
 
-    fig, ax = _plt.subplots(figsize=figsize)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
+    #fig, ax = _plt.subplots(figsize=figsize)
+    fig = go.Figure()
+    fig.update_layout(autosize=False, width=figsize[0], height=figsize[1], title=title)
+    # ax.spines['top'].set_visible(False)
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
 
-    fig.suptitle(title, fontsize=14, y=.995,
-                 fontname=fontname, fontweight='bold', color='black')
+    # fig.suptitle(title, fontsize=14, y=.995,
+    #              fontname=fontname, fontweight='bold', color='black')
 
     if subtitle:
-        ax.set_title("\n%s - %s ;  P&L: %s (%s)                " % (
+        # ax.set_title("\n%s - %s ;  P&L: %s (%s)                " % (
+        #     returns.index.date[1:2][0].strftime('%e %b \'%y'),
+        #     returns.index.date[-1:][0].strftime('%e %b \'%y'),
+        #     _utils._score_str("${:,}".format(
+        #         round(returns.values[-1] - returns.values[0], 2))),
+        #     _utils._score_str("{:,}%".format(
+        #         round((returns.values[-1] / returns.values[0] - 1) * 100, 2)))
+        # ), fontsize=12, color='gray')
+        fig.update_layout(title="\n%s - %s ;  P&L: %s (%s)                " % (
             returns.index.date[1:2][0].strftime('%e %b \'%y'),
             returns.index.date[-1:][0].strftime('%e %b \'%y'),
             _utils._score_str("${:,}".format(
-                round(returns.values[-1]-returns.values[0], 2))),
+                round(returns.values[-1] - returns.values[0], 2))),
             _utils._score_str("{:,}%".format(
-                round((returns.values[-1]/returns.values[0]-1)*100, 2)))
-        ), fontsize=12, color='gray')
+                round((returns.values[-1] / returns.values[0] - 1) * 100, 2)))
+        ))
 
     mx = returns.max()
     returns_max = returns[returns == mx]
     ix = returns_max[~_np.isnan(returns_max)].index[0]
     returns_max = _np.where(returns.index == ix, mx, _np.nan)
 
-    ax.plot(returns.index, returns_max, marker='o', lw=0,
-            alpha=alpha, markersize=12, color=colors[0])
-    ax.plot(returns.index, returns, color=colors[1],
-            lw=1 if grayscale else lw)
+    fig.add_trace(go.Scatter(x=returns.index, y=returns_max, marker=dict(color=colors[0], size=12), mode='markers', name='max'))
+    # ax.plot(returns.index, returns_max, marker='o', lw=0,
+    #         alpha=alpha, markersize=12, color=colors[0])
+    fig.add_trace(go.Scatter(x=returns.index, y=returns, marker=dict(color=colors[1])))
+    # ax.plot(returns.index, returns, color=colors[1],
+    #         lw=1 if grayscale else lw)
+    fig.update_layout(yaxis_title='Value of  ${:,.0f}'.format(start_balance))
+    # ax.set_ylabel('Value of  ${:,.0f}'.format(start_balance),
+    #               fontname=fontname, fontweight='bold', fontsize=12)
+    # TODO: worry about this later
+    # ax.yaxis.set_major_formatter(_FuncFormatter(_core.format_cur_axis))
+    # ax.yaxis.set_label_coords(-.1, .5)
 
-    ax.set_ylabel('Value of  ${:,.0f}'.format(start_balance),
-                  fontname=fontname, fontweight='bold', fontsize=12)
+    # fig.set_facecolor('white')
+    # ax.set_facecolor('white')
+    # fig.autofmt_xdate()
 
-    ax.yaxis.set_major_formatter(_FuncFormatter(_core.format_cur_axis))
-    ax.yaxis.set_label_coords(-.1, .5)
-
-    fig.set_facecolor('white')
-    ax.set_facecolor('white')
-    fig.autofmt_xdate()
-
-    try:
-        _plt.subplots_adjust(hspace=0)
-    except Exception:
-        pass
-    try:
-        fig.tight_layout(w_pad=0, h_pad=0)
-    except Exception:
-        pass
-
-    if savefig:
-        if isinstance(savefig, dict):
-            _plt.savefig(**savefig)
-        else:
-            _plt.savefig(savefig)
+    # try:
+    #     _plt.subplots_adjust(hspace=0)
+    # except Exception:
+    #     pass
+    # try:
+    #     fig.tight_layout(w_pad=0, h_pad=0)
+    # except Exception:
+    #     pass
+    #
+    # if savefig:
+    #     if isinstance(savefig, dict):
+    #         _plt.savefig(**savefig)
+    #     else:
+    #         _plt.savefig(savefig)
 
     if show:
-        _plt.show(block=False)
+        # _plt.show(block=False)
+        fig.show()
 
-    _plt.close()
+    # _plt.close()
 
     if not show:
         return fig
@@ -252,7 +308,6 @@ def returns(returns, benchmark=None,
             match_volatility=False, compound=True, cumulative=True,
             resample=None, ylabel="Cumulative Returns",
             subtitle=True, savefig=None, show=True):
-
     title = 'Cumulative Returns' if compound else 'Returns'
     if benchmark is not None:
         if isinstance(benchmark, str):
@@ -288,7 +343,6 @@ def log_returns(returns, benchmark=None,
                 match_volatility=False, compound=True, cumulative=True,
                 resample=None, ylabel="Cumulative Returns",
                 subtitle=True, savefig=None, show=True):
-
     title = 'Cumulative Returns' if compound else 'Returns'
     if benchmark is not None:
         if isinstance(benchmark, str):
@@ -326,7 +380,6 @@ def daily_returns(returns,
                   fontname='Arial', lw=0.5,
                   log_scale=False, ylabel="Returns",
                   subtitle=True, savefig=None, show=True):
-
     returns = _utils._prepare_returns(returns)
     fig = _core.plot_timeseries(returns, None, 'Daily Returns',
                                 ylabel=ylabel,
@@ -351,13 +404,12 @@ def yearly_returns(returns, benchmark=None,
                    log_scale=False, figsize=(10, 5), ylabel=True,
                    subtitle=True, compounded=True,
                    savefig=None, show=True):
-
     title = 'EOY Returns'
     if benchmark is not None:
         title += '  vs Benchmark'
         benchmark = _utils._prepare_benchmark(
             benchmark, returns.index).resample('A').apply(
-                _stats.compsum).resample('A').last()
+            _stats.compsum).resample('A').last()
 
     returns = _utils._prepare_returns(returns).resample('A')
     if compounded:
@@ -404,7 +456,6 @@ def distribution(returns, fontname='Arial', grayscale=False, ylabel=True,
 def histogram(returns, resample='M', fontname='Arial',
               grayscale=False, figsize=(10, 5), ylabel=True,
               subtitle=True, compounded=True, savefig=None, show=True):
-
     returns = _utils._prepare_returns(returns)
     if resample == 'W':
         title = "Weekly "
@@ -433,7 +484,6 @@ def drawdown(returns, grayscale=False, figsize=(10, 5),
              fontname='Arial', lw=1, log_scale=False,
              match_volatility=False, compound=False, ylabel="Drawdown",
              resample=None, subtitle=True, savefig=None, show=True):
-
     dd = _stats.to_drawdown_series(returns)
 
     fig = _core.plot_timeseries(dd, title='Underwater Plot',
@@ -476,7 +526,6 @@ def rolling_beta(returns, benchmark,
                  lw=1.5, fontname='Arial', grayscale=False,
                  figsize=(10, 3), ylabel=True,
                  subtitle=True, savefig=None, show=True):
-
     returns = _utils._prepare_returns(returns)
     benchmark = _utils._prepare_benchmark(benchmark, returns.index)
 
@@ -501,7 +550,6 @@ def rolling_volatility(returns, benchmark=None,
                        lw=1.5, fontname='Arial', grayscale=False,
                        figsize=(10, 3), ylabel="Volatility",
                        subtitle=True, savefig=None, show=True):
-
     returns = _utils._prepare_returns(returns)
     returns = returns.rolling(period).std() * _np.sqrt(trading_year_days)
 
@@ -530,7 +578,6 @@ def rolling_sharpe(returns, benchmark=None, rf=0.,
                    lw=1.25, fontname='Arial', grayscale=False,
                    figsize=(10, 3), ylabel="Sharpe",
                    subtitle=True, savefig=None, show=True):
-
     returns = _utils._prepare_returns(returns, rf)
     returns = returns.rolling(period).mean() / returns.rolling(period).std()
     returns = returns * _np.sqrt(
@@ -564,10 +611,9 @@ def rolling_sortino(returns, benchmark=None, rf=0.,
                     lw=1.25, fontname='Arial', grayscale=False,
                     figsize=(10, 3), ylabel="Sortino",
                     subtitle=True, savefig=None, show=True):
-
     returns = _utils._prepare_returns(returns, rf)
     returns = returns.rolling(period).mean() / \
-        returns[returns < 0].rolling(period).std()
+              returns[returns < 0].rolling(period).std()
     returns = returns * _np.sqrt(
         1 if trading_year_days is None else trading_year_days)
 
@@ -598,7 +644,6 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
                     compounded=True, eoy=False,
                     grayscale=False, fontname='Arial',
                     ylabel=True, savefig=None, show=True):
-
     # colors, ls, alpha = _core._get_colors(grayscale)
     cmap = 'gray' if grayscale else 'RdYlGn'
 
@@ -614,7 +659,7 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
     figsize = (figsize[0], max([fig_height, figsize[1]]))
 
     if cbar:
-        figsize = (figsize[0]*1.04, max([fig_height, figsize[1]]))
+        figsize = (figsize[0] * 1.04, max([fig_height, figsize[1]]))
 
     fig, ax = _plt.subplots(figsize=figsize)
     ax.spines['top'].set_visible(False)
@@ -643,8 +688,8 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
         ax.yaxis.set_label_coords(-.1, .5)
 
     ax.tick_params(colors="#808080")
-    _plt.xticks(rotation=0, fontsize=annot_size*1.2)
-    _plt.yticks(rotation=0, fontsize=annot_size*1.2)
+    _plt.xticks(rotation=0, fontsize=annot_size * 1.2)
+    _plt.yticks(rotation=0, fontsize=annot_size * 1.2)
 
     try:
         _plt.subplots_adjust(hspace=0, bottom=0, top=1)
@@ -664,7 +709,7 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
     if show:
         _plt.show(block=False)
 
-    _plt.close()
+    # _plt.close()
 
     if not show:
         return fig
