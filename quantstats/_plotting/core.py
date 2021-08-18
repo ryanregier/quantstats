@@ -295,18 +295,19 @@ def plot_timeseries(returns, benchmark=None,
     # use a more precise date string for the x axis locations in the toolbar
     # ax.fmt_xdata = _mdates.DateFormatter('%Y-%m-%d')
 
-    # TODO: idk wtf this is supposed to do
-    # if hline:
-    #     if grayscale:
-    #         hlcolor = 'black'
-    #     ax.axhline(hline, ls="--", lw=hlw, color=hlcolor,
-    #                label=hllabel, zorder=2)
+    if hline:
+        hlcolor = 'black'
+        if grayscale:
+            hlcolor = 'red'
+        fig.add_hline(y=hline, line_dash='dot')
+        # ax.axhline(hline, ls="--", lw=hlw, color=hlcolor,
+        #            label=hllabel, zorder=2)
 
     # ax.axhline(0, ls="-", lw=1,
     #            color='gray', zorder=1)
     # ax.axhline(0, ls="--", lw=1,
     #            color='white' if grayscale else 'black', zorder=2)
-    fig.add_hline(y=0, line_dash="dot")
+    fig.add_hline(y=0, line_dash="solid")
 
     if isinstance(benchmark, _pd.Series) or hline:
         pass
@@ -371,150 +372,65 @@ def plot_histogram(returns, resample="M", bins=20,
         apply_fnc).resample(resample).last()
 
     fig = go.Figure()
-    # fig, ax = _plt.subplots(figsize=figsize)
-    # ax.spines['top'].set_visible(False)
-    # ax.spines['right'].set_visible(False)
-    # ax.spines['bottom'].set_visible(False)
-    # ax.spines['left'].set_visible(False)
-
-    fig.update_layout(title=title + "\n")
-    # fig.suptitle(title + "\n", y=.99, fontweight="bold", fontname=fontname,
-    #              fontsize=14, color="black")
-
-    if subtitle:
-        fig.update_layout(title=title + "\n" + "\n%s - %s                   " % (
-            returns.index.date[:1][0].strftime('%Y'),
-            returns.index.date[-1:][0].strftime('%Y')
-        ))
-        # ax.set_title("\n%s - %s                   " % (
-        #     returns.index.date[:1][0].strftime('%Y'),
-        #     returns.index.date[-1:][0].strftime('%Y')
-        # ), fontsize=12, color='gray')
-
-    # fig.set_facecolor('white')
-    # ax.set_facecolor('white')
-    fig.add_vline(x=returns.mean(), line_dash="dash", line_color=colors[2], annotation_text="Average",
-                  annotation_position="top left")
-    # ax.axvline(returns.mean(), ls="--", lw=1.5,
-    #            color=colors[2], zorder=2, label="Average")
-    df = pd.DataFrame()
-    df['date'] = returns.index
-    df['value'] = returns.tolist()
-    fig.add_trace(
-        px.histogram(df, x='date', y='value', histfunc="avg")
-    )
-    # _sns.histplot(returns, bins=bins,
-    #               color=colors[0],
-    #               alpha=1,
-    #               kde=kde,
-    #               stat="density",
-    #               ax=ax)
-    # _sns.kdeplot(returns, color='black', linewidth=1.5)
-
-    # ax.xaxis.set_major_formatter(_plt.FuncFormatter(
-    #     lambda x, loc: "{:,}%".format(int(x * 100))))
-
-    fig.add_hline(y=0.01, line_color="#000000")
-    # ax.axhline(0.01, lw=1, color="#000000", zorder=2)
-    fig.add_vline(x=0, line_color="#000000")
-    # ax.axvline(0, lw=1, color="#000000", zorder=2)
-
-    fig.update_layout(xaxis_title='')
-    # ax.set_xlabel('')
-    if ylabel:
-        fig.update_layout(yaxis_title="Occurrences")
-        # ax.set_ylabel("Occurrences", fontname=fontname,
-        #               fontweight='bold', fontsize=12, color="black")
-        # ax.yaxis.set_label_coords(-.1, .5)
-
-    # ax.legend(fontsize=12)
-
-    # fig.autofmt_xdate()
-
-    # try:
-    #     _plt.subplots_adjust(hspace=0, bottom=0, top=1)
-    # except Exception:
-    #     pass
-    #
-    # try:
-    #     fig.tight_layout()
-    # except Exception:
-    #     pass
-
-    if savefig:
-        # if isinstance(savefig, dict):
-        #     _plt.savefig(**savefig)
-        # else:
-        #     _plt.savefig(savefig)
-        pass
-
-    if show:
-        fig.show()
-
-    # _plt.close()
-
-    if not show:
-        return fig
-
-    return None
-
-
-def plot_rolling_stats(returns, benchmark=None, title="",
-                       returns_label="Strategy",
-                       hline=None, hlw=None, hlcolor="red", hllabel="",
-                       lw=1.5, figsize=(10, 6), ylabel="",
-                       grayscale=False, fontname="Arial", subtitle=True,
-                       savefig=None, show=True):
-    colors, _, _ = _get_colors(grayscale)
-
-    fig = go.Figure()
     fig, ax = _plt.subplots(figsize=figsize)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
     ax.spines['left'].set_visible(False)
 
-    df = _pd.DataFrame(index=returns.index, data={returns_label: returns})
-    print(df)
-    if isinstance(benchmark, _pd.Series):
-        df['Benchmark'] = benchmark[benchmark.index.isin(returns.index)]
-        df = df[['Benchmark', returns_label]].dropna()
-        ax.plot(df['Benchmark'], lw=lw, label="Benchmark",
-                color=colors[0], alpha=.8)
-
-    ax.plot(df[returns_label].dropna(), lw=lw,
-            label=returns_label, color=colors[1])
-
-    # rotate and align the tick labels so they look better
-    fig.autofmt_xdate()
-
-    # use a more precise date string for the x axis locations in the toolbar
-    # ax.fmt_xdata = _mdates.DateFormatter('%Y-%m-%d')\
+    # fig.update_layout(title=title + "\n")
     fig.suptitle(title + "\n", y=.99, fontweight="bold", fontname=fontname,
                  fontsize=14, color="black")
 
     if subtitle:
+        # fig.update_layout(title=title + "\n" + "\n%s - %s                   " % (
+        #     returns.index.date[:1][0].strftime('%Y'),
+        #     returns.index.date[-1:][0].strftime('%Y')
+        # ))
         ax.set_title("\n%s - %s                   " % (
-            df.index.date[:1][0].strftime('%e %b \'%y'),
-            df.index.date[-1:][0].strftime('%e %b \'%y')
+            returns.index.date[:1][0].strftime('%Y'),
+            returns.index.date[-1:][0].strftime('%Y')
         ), fontsize=12, color='gray')
 
-    if hline:
-        if grayscale:
-            hlcolor = 'black'
-        ax.axhline(hline, ls="--", lw=hlw, color=hlcolor,
-                   label=hllabel, zorder=2)
+    # fig.set_facecolor('white')
+    # ax.set_facecolor('white')
+    # fig.add_vline(x=returns.mean(), line_dash="dash", line_color=colors[2], annotation_text="Average",
+    #               annotation_position="top left")
+    ax.axvline(returns.mean(), ls="--", lw=1.5,
+               color=colors[2], zorder=2, label="Average")
+    df = pd.DataFrame()
+    df['date'] = returns.index
+    df['value'] = returns.tolist()
+    # fig.add_trace(
+    #     px.histogram(df, x='date', y='value', histfunc="avg")
+    # )
+    _sns.histplot(returns, bins=bins,
+                  color=colors[0],
+                  alpha=1,
+                  kde=kde,
+                  stat="density",
+                  ax=ax)
+    _sns.kdeplot(returns, color='black', linewidth=1.5)
 
-    ax.axhline(0, ls="--", lw=1, color="#000000", zorder=2)
+    ax.xaxis.set_major_formatter(_plt.FuncFormatter(
+        lambda x, loc: "{:,}%".format(int(x * 100))))
 
+    # fig.add_hline(y=0.01, line_color="#000000")
+    ax.axhline(0.01, lw=1, color="#000000", zorder=2)
+    # fig.add_vline(x=0, line_color="#000000")
+    ax.axvline(0, lw=1, color="#000000", zorder=2)
+
+    # fig.update_layout(xaxis_title='')
+    ax.set_xlabel('')
     if ylabel:
-        ax.set_ylabel(ylabel, fontname=fontname,
+        # fig.update_layout(yaxis_title="Occurrences")
+        ax.set_ylabel("Occurrences", fontname=fontname,
                       fontweight='bold', fontsize=12, color="black")
         ax.yaxis.set_label_coords(-.1, .5)
 
-    ax.yaxis.set_major_formatter(_FormatStrFormatter('%.2f'))
-
     ax.legend(fontsize=12)
+
+    fig.autofmt_xdate()
 
     try:
         _plt.subplots_adjust(hspace=0, bottom=0, top=1)
@@ -531,10 +447,106 @@ def plot_rolling_stats(returns, benchmark=None, title="",
             _plt.savefig(**savefig)
         else:
             _plt.savefig(savefig)
+        pass
+
     if show:
-        _plt.show(block=False)
+        fig.show()
 
     _plt.close()
+
+    if not show:
+        return fig
+
+    return None
+
+
+def plot_rolling_stats(returns, benchmark=None, title="",
+                       returns_label="Strategy",
+                       hline=None, hlw=None, hlcolor="red", hllabel="",
+                       lw=1.5, figsize=(10, 6), ylabel="",
+                       grayscale=False, fontname="Arial", subtitle=True,
+                       savefig=None, show=True):
+    colors, _, _ = _get_colors(grayscale)
+
+    fig = go.Figure()
+    # fig, ax = _plt.subplots(figsize=figsize)
+    # ax.spines['top'].set_visible(False)
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
+
+    df = _pd.DataFrame(index=returns.index, data={returns_label: returns})
+    # print(df)
+    # if isinstance(benchmark, _pd.Series):
+    #     df['Benchmark'] = benchmark[benchmark.index.isin(returns.index)]
+    #     df = df[['Benchmark', returns_label]].dropna()
+    #     ax.plot(df['Benchmark'], lw=lw, label="Benchmark",
+    #             color=colors[0], alpha=.8)
+
+    fig.add_trace(go.Scatter(
+        x=df.index, y=df[returns_label].dropna()
+    ))
+    # ax.plot(df[returns_label].dropna(), lw=lw,
+    #         label=returns_label, color=colors[1])
+
+    # rotate and align the tick labels so they look better
+    # fig.autofmt_xdate()
+
+    # use a more precise date string for the x axis locations in the toolbar
+    # ax.fmt_xdata = _mdates.DateFormatter('%Y-%m-%d')
+    fig.update_layout(title=title + "\n")
+    # fig.suptitle(title + "\n", y=.99, fontweight="bold", fontname=fontname,
+    #              fontsize=14, color="black")
+
+    if subtitle:
+        fig.update_layout(title=title + "\n" + "\n%s - %s                   " % (
+            df.index.date[:1][0].strftime('%e %b \'%y'),
+            df.index.date[-1:][0].strftime('%e %b \'%y')
+        ))
+        # ax.set_title("\n%s - %s                   " % (
+        #     df.index.date[:1][0].strftime('%e %b \'%y'),
+        #     df.index.date[-1:][0].strftime('%e %b \'%y')
+        # ), fontsize=12, color='gray')
+
+    if hline:
+        if grayscale:
+            hlcolor = 'black'
+            fig.add_hline(y=hline, line_color=hlcolor)
+        # ax.axhline(hline, ls="--", lw=hlw, color=hlcolor,
+        #            label=hllabel, zorder=2)
+
+    fig.add_hline(y=0, line_color="#000000")
+    # ax.axhline(0, ls="--", lw=1, color="#000000", zorder=2)
+
+    if ylabel:
+        fig.update_layout(yaxis_title=ylabel)
+        # ax.set_ylabel(ylabel, fontname=fontname,
+        #               fontweight='bold', fontsize=12, color="black")
+        # ax.yaxis.set_label_coords(-.1, .5)
+
+    # ax.yaxis.set_major_formatter(_FormatStrFormatter('%.2f'))
+
+    # ax.legend(fontsize=12)
+
+    # try:
+    #     _plt.subplots_adjust(hspace=0, bottom=0, top=1)
+    # except Exception:
+    #     pass
+    #
+    # try:
+    #     fig.tight_layout()
+    # except Exception:
+    #     pass
+    #
+    # if savefig:
+    #     if isinstance(savefig, dict):
+    #         _plt.savefig(**savefig)
+    #     else:
+    #         _plt.savefig(savefig)
+    if show:
+        fig.show()
+
+    # _plt.close()
 
     if not show:
         return fig
@@ -630,79 +642,101 @@ def plot_longest_drawdowns(returns, periods=5, lw=1.5,
         colors = ['#000000'] * 3
 
     dd = _stats.to_drawdown_series(returns.fillna(0))
+    # print(dd)
     dddf = _stats.drawdown_details(dd)
+    # print(dddf)
     longest_dd = dddf.sort_values(
         by='days', ascending=False, kind='mergesort')[:periods]
 
-    fig, ax = _plt.subplots(figsize=figsize)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-
-    fig.suptitle("Top %.0f Drawdown Periods\n" %
-                 periods, y=.99, fontweight="bold", fontname=fontname,
-                 fontsize=14, color="black")
+    fig = go.Figure()
+    # fig, ax = _plt.subplots(figsize=figsize)
+    # ax.spines['top'].set_visible(False)
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    # ax.spines['left'].set_visible(False)
+    fig.update_layout(title="Top %.0f Drawdown Periods\n" %
+                            periods)
+    # fig.suptitle("Top %.0f Drawdown Periods\n" %
+    #              periods, y=.99, fontweight="bold", fontname=fontname,
+    #              fontsize=14, color="black")
     if subtitle:
-        ax.set_title("\n%s - %s                   " % (
-            returns.index.date[:1][0].strftime('%e %b \'%y'),
-            returns.index.date[-1:][0].strftime('%e %b \'%y')
-        ), fontsize=12, color='gray')
+        fig.update_layout(title="Top %.0f Drawdown Periods\n" %
+                                periods + "\n%s - %s                   " % (
+                                    returns.index.date[:1][0].strftime('%e %b \'%y'),
+                                    returns.index.date[-1:][0].strftime('%e %b \'%y')
+                                ))
+        # ax.set_title("\n%s - %s                   " % (
+        #     returns.index.date[:1][0].strftime('%e %b \'%y'),
+        #     returns.index.date[-1:][0].strftime('%e %b \'%y')
+        # ), fontsize=12, color='gray')
 
-    fig.set_facecolor('white')
-    ax.set_facecolor('white')
+    # fig.set_facecolor('white')
+    # ax.set_facecolor('white')
     series = _stats.compsum(returns) if compounded else returns.cumsum()
-    ax.plot(series, lw=lw, label="Backtest", color=colors[0])
+    # print(series)
+    df = pd.DataFrame()
+    df['date'] = series.index
+    df['value'] = series.tolist()
+    fig.add_trace(go.Scatter(x=df['date'], y=df['value']))
+    # ax.plot(series, lw=lw, label="Backtest", color=colors[0])
 
     highlight = 'black' if grayscale else 'red'
+    maxy = max(df['value'])
+    miny = min(df['value'])
     for _, row in longest_dd.iterrows():
-        ax.axvspan(*_mdates.datestr2num([str(row['start']), str(row['end'])]),
-                   color=highlight, alpha=.1)
+        # ax.axvspan(*_mdates.datestr2num([str(row['start']), str(row['end'])]),
+        #            color=highlight, alpha=.1)
+        fig.add_shape(type="rect",
+                      xref="x", yref="y",
+                      x0=row['start'], x1=row['end'], y0=miny, y1=maxy, fillcolor=highlight, opacity=0.1
+                      )
 
     # rotate and align the tick labels so they look better
-    fig.autofmt_xdate()
+    # fig.autofmt_xdate()
 
     # use a more precise date string for the x axis locations in the toolbar
-    ax.fmt_xdata = _mdates.DateFormatter('%Y-%m-%d')
+    # ax.fmt_xdata = _mdates.DateFormatter('%Y-%m-%d')
 
-    ax.axhline(0, ls="--", lw=1, color="#000000", zorder=2)
-    _plt.yscale("symlog" if log_scale else "linear")
+    fig.add_hline(y=0, line_color="#000000")
+    # ax.axhline(0, ls="--", lw=1, color="#000000", zorder=2)
+    # _plt.yscale("symlog" if log_scale else "linear")
     if ylabel:
-        ax.set_ylabel("Cumulative Returns", fontname=fontname,
-                      fontweight='bold', fontsize=12, color="black")
-        ax.yaxis.set_label_coords(-.1, .5)
+        fig.update_layout(yaxis_title="Cumulative Returns")
+        # ax.set_ylabel("Cumulative Returns", fontname=fontname,
+        #               fontweight='bold', fontsize=12, color="black")
+        # ax.yaxis.set_label_coords(-.1, .5)
 
-    ax.yaxis.set_major_formatter(_FuncFormatter(format_pct_axis))
+    # ax.yaxis.set_major_formatter(_FuncFormatter(format_pct_axis))
     # ax.yaxis.set_major_formatter(_plt.FuncFormatter(
     #     lambda x, loc: "{:,}%".format(int(x*100))))
 
-    fig.autofmt_xdate()
-
-    try:
-        _plt.subplots_adjust(hspace=0, bottom=0, top=1)
-    except Exception:
-        pass
-
-    try:
-        fig.tight_layout()
-    except Exception:
-        pass
-
-    if savefig:
-        if isinstance(savefig, dict):
-            _plt.savefig(**savefig)
-        else:
-            _plt.savefig(savefig)
-
-    if show:
-        _plt.show(block=False)
-
-    _plt.close()
+    # fig.autofmt_xdate()
+    #
+    # try:
+    #     _plt.subplots_adjust(hspace=0, bottom=0, top=1)
+    # except Exception:
+    #     pass
+    #
+    # try:
+    #     fig.tight_layout()
+    # except Exception:
+    #     pass
+    #
+    # if savefig:
+    #     if isinstance(savefig, dict):
+    #         _plt.savefig(**savefig)
+    #     else:
+    #         _plt.savefig(savefig)
+    #
+    # if show:
+    #     _plt.show(block=False)
+    #
+    # _plt.close()
 
     if not show:
         return fig
 
-    return None
+    return fig
 
 
 def plot_distribution(returns, figsize=(10, 6),
