@@ -75,8 +75,8 @@ def snapshot(returns, grayscale=False, figsize=(10, 8),
     # fig, axes = _plt.subplots(3, 1, sharex=True, figsize=figsize,
     #                           gridspec_kw={'height_ratios': [3, 1, 1]})
     fig = make_subplots(rows=3, cols=1,
-                               shared_xaxes=True,
-                               vertical_spacing=0.02, subplot_titles=("Plot 1"))
+                        shared_xaxes=True,
+                        vertical_spacing=0.02, subplot_titles=("Plot 1"))
     # TODO: figure out wtf this is
     # for ax in axes:
     #     ax.spines['top'].set_visible(False)
@@ -142,7 +142,7 @@ def snapshot(returns, grayscale=False, figsize=(10, 8),
     df.reset_index(drop=True, inplace=True)
     fig.add_trace(go.Scatter(name="Drawdown", x=df['Date'], y=df['Value']), row=2, col=1)
     # axes[1].plot(dd, color=colors[2], lw=1 if grayscale else 1, zorder=1)
-    #TODO: figure out how to add horizontal lines to the subplots
+    # TODO: figure out how to add horizontal lines to the subplots
     # axes[1].axhline(0, color='silver', lw=1, zorder=0)
     # if not grayscale:
     #     axes[1].fill_between(dd.index, 0, dd, color=colors[2], alpha=.1)
@@ -224,7 +224,7 @@ def earnings(returns, start_balance=1e5, mode="comp",
         size = list(_plt.gcf().get_size_inches())
         figsize = (size[0], size[0] * .55)
 
-    #fig, ax = _plt.subplots(figsize=figsize)
+    # fig, ax = _plt.subplots(figsize=figsize)
     fig = go.Figure()
     fig.update_layout(autosize=False, width=figsize[0], height=figsize[1], title=title)
     # ax.spines['top'].set_visible(False)
@@ -258,7 +258,8 @@ def earnings(returns, start_balance=1e5, mode="comp",
     ix = returns_max[~_np.isnan(returns_max)].index[0]
     returns_max = _np.where(returns.index == ix, mx, _np.nan)
 
-    fig.add_trace(go.Scatter(x=returns.index, y=returns_max, marker=dict(color=colors[0], size=12), mode='markers', name='max'))
+    fig.add_trace(
+        go.Scatter(x=returns.index, y=returns_max, marker=dict(color=colors[0], size=12), mode='markers', name='max'))
     # ax.plot(returns.index, returns_max, marker='o', lw=0,
     #         alpha=alpha, markersize=12, color=colors[0])
     fig.add_trace(go.Scatter(x=returns.index, y=returns, marker=dict(color=colors[1])))
@@ -675,7 +676,17 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
     #              fontname=fontname, fontweight='bold', color='black')
 
     # _sns.set(font_scale=.9)
-    fig.add_trace(go.Heatmap(z=returns))
+    fig.add_trace(go.Heatmap(z=returns, colorscale=[[0.0, "rgb(165,0,38)"],
+                                                    [0.1111111111111111, "rgb(215,48,39)"],
+                                                    [0.2222222222222222, "rgb(244,109,67)"],
+                                                    [0.3333333333333333, "rgb(253,174,97)"],
+                                                    [0.4444444444444444, "rgb(254,224,144)"],
+                                                    [0.5555555555555556, "rgb(224,243,248)"],
+                                                    [0.6666666666666666, "rgb(171,217,233)"],
+                                                    [0.7777777777777778, "rgb(116,173,209)"],
+                                                    [0.8888888888888888, "rgb(69,117,180)"],
+                                                    [1.0, "rgb(49,54,149)"]], xgap=15,
+                             ygap=1, ))
     # ax = _sns.heatmap(returns, ax=ax, annot=True, center=0,
     #                   annot_kws={"size": annot_size},
     #                   fmt="0.2f", linewidths=0.5,

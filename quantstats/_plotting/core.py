@@ -18,6 +18,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
+import numpy as np
+from KDEpy import FFTKDE
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import plotly
@@ -372,8 +374,8 @@ def plot_histogram(returns, resample="M", bins=20,
     returns = returns.fillna(0).resample(resample).apply(
         apply_fnc).resample(resample).last()
 
-    fig = go.Figure()
-    # fig = make_subplots(rows=2, rows=1, shared_xaxes=True, shared_yaxes=True)
+    # fig = go.Figure()
+    fig = make_subplots(rows=1, cols=1, shared_xaxes=True, shared_yaxes=True)
     # fig, ax = _plt.subplots(figsize=figsize)
     # ax.spines['top'].set_visible(False)
     # ax.spines['right'].set_visible(False)
@@ -396,16 +398,22 @@ def plot_histogram(returns, resample="M", bins=20,
 
     # fig.set_facecolor('white')
     # ax.set_facecolor('white')
-    fig.add_vline(x=returns.mean(), line_dash="dash", line_color=colors[2], annotation_text="Average",
-                  annotation_position="top left")
     # ax.axvline(returns.mean(), ls="--", lw=1.5,
     #            color=colors[2], zorder=2, label="Average")
     df = pd.DataFrame()
     df['date'] = returns.index
     df['value'] = returns.tolist()
     # print(df['date'])
+    x, y1 = FFTKDE(bw="silverman").fit(np.array(df['value'].values.tolist())).evaluate(2 ** 10)
+    df['maxY'] = max(y1)
     fig.add_trace(
-        go.Bar(x=df['date'], y=df['value'])
+        go.Bar(x=df['value'], y=df['maxY'], name="Monthly Returns"), row=1, col=1
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=x, y=y1, name="KDE Scatter"
+        ),
+        row=1, col=1
     )
     # _sns.histplot(returns, bins=bins,
     #               color=colors[0],
@@ -417,7 +425,8 @@ def plot_histogram(returns, resample="M", bins=20,
     #
     # ax.xaxis.set_major_formatter(_plt.FuncFormatter(
     #     lambda x, loc: "{:,}%".format(int(x * 100))))
-
+    fig.add_vline(x=returns.mean(), line_dash="dash", line_color=colors[2], annotation_text="Average",
+                  annotation_position="top left", row=1, col=1)
     fig.add_hline(y=0.01, line_color="#000000")
     # ax.axhline(0.01, lw=1, color="#000000", zorder=2)
     fig.add_vline(x=0, line_color="#000000")

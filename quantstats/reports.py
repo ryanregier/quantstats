@@ -292,9 +292,10 @@ def basic(returns, benchmark=None, rf=0., grayscale=False,
         print('\n\n')
         print('[Strategy Visualization]\nvia Matplotlib')
 
-    plots(returns=returns, benchmark=benchmark,
+    figs = plots(returns=returns, benchmark=benchmark,
           grayscale=grayscale, figsize=figsize, mode='basic',
           trading_year_days=trading_year_days)
+    return figs
 
 
 def metrics(returns, benchmark=None, rf=0., display=True,
@@ -536,16 +537,18 @@ def plots(returns, benchmark=None, grayscale=False,
         fig = _plots.snapshot(returns, grayscale=grayscale,
                               figsize=(figsize[0], figsize[0]),
                               show=False, mode=("comp" if compounded else "sum"))
+        # fig.show()
         fig_list.append(fig)
 
         fig = _plots.monthly_heatmap(returns, grayscale=grayscale,
                                      figsize=(figsize[0], figsize[0] * .5),
                                      show=False, ylabel=False,
                                      compounded=compounded)
+        # fig.show()
         fig_list.append(fig)
         # print(len(fig_list))
         # print(fig_list)
-        fig_list[0].show()
+        # fig_list[0].show()
 
         return fig_list
 
@@ -575,7 +578,7 @@ def plots(returns, benchmark=None, grayscale=False,
     fig = _plots.histogram(returns, grayscale=grayscale,
                      figsize=(figsize[0], figsize[0] * .5),
                      show=False, ylabel=False)
-    fig.show()
+    # fig.show()
     fig_list.append(fig)
 
     fig = _plots.daily_returns(returns, grayscale=grayscale,
