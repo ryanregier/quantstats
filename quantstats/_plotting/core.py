@@ -125,8 +125,9 @@ def plot_returns_bars(returns, benchmark=None,
         colors = colors[1:]
     # print(df)
     fig.add_trace(go.Bar(
-        x=df.index, y=df['Strategy']
+        x=df.index, y=df['Strategy'], width=[0.2]
     ))
+    fig.update_yaxes(tickformat="%")
     # df.plot(kind='bar', ax=ax, color=colors)
 
     # fig.set_facecolor('white')
@@ -286,7 +287,10 @@ def plot_timeseries(returns, benchmark=None,
     df = pd.DataFrame()
     df['date'] = returns.index
     df['value'] = returns.tolist()
-    fig.add_trace(go.Scatter(x=df['date'], y=df['value']))
+    if title == 'Underwater Plot':
+        fig.add_trace(go.Scatter(x=df['date'], y=df['value'], fill='tozeroy'))
+    else:
+        fig.add_trace(go.Scatter(x=df['date'], y=df['value']))
     # ax.plot(returns, lw=lw, label=returns_label, color=colors[1], alpha=alpha)
 
     # if fill:
@@ -294,6 +298,7 @@ def plot_timeseries(returns, benchmark=None,
 
     # rotate and align the tick labels so they look better
     # fig.autofmt_xdate()
+    fig.update_yaxes(tickformat="%")
 
     # use a more precise date string for the x axis locations in the toolbar
     # ax.fmt_xdata = _mdates.DateFormatter('%Y-%m-%d')
@@ -433,6 +438,7 @@ def plot_histogram(returns, resample="M", bins=20,
     # ax.axvline(0, lw=1, color="#000000", zorder=2)
 
     fig.update_layout(xaxis_title='')
+    fig.update_xaxes(tickformat="%")
     # ax.set_xlabel('')
     if ylabel:
         fig.update_layout(yaxis_title="Occurrences")
@@ -668,6 +674,7 @@ def plot_longest_drawdowns(returns, periods=5, lw=1.5,
     # ax.spines['left'].set_visible(False)
     fig.update_layout(title="Top %.0f Drawdown Periods\n" %
                             periods)
+    fig.update_yaxes(tickformat="%")
     # fig.suptitle("Top %.0f Drawdown Periods\n" %
     #              periods, y=.99, fontweight="bold", fontname=fontname,
     #              fontsize=14, color="black")
@@ -789,6 +796,7 @@ def plot_distribution(returns, figsize=(10, 6),
     # ax.spines['left'].set_visible(False)
 
     fig.update_layout(title="Return Quantiles\n")
+    fig.update_xaxes(tickformat="%")
     # fig.suptitle("Return Quantiles\n", y=.99,
     #              fontweight="bold", fontname=fontname,
     #              fontsize=14, color="black")
@@ -811,6 +819,7 @@ def plot_distribution(returns, figsize=(10, 6),
     fig.add_trace(go.Box(y=port['Monthly'], name="Monthly"))
     fig.add_trace(go.Box(y=port['Quarterly'], name="Quarterly"))
     fig.add_trace(go.Box(y=port['Yearly'], name="Yearly"))
+    fig.update_yaxes(tickformat="%")
     # _sns.boxplot(data=port, ax=ax, palette=tuple(colors[:5]))
 
     # ax.yaxis.set_major_formatter(_plt.FuncFormatter(

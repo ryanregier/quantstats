@@ -156,6 +156,8 @@ def snapshot(returns, grayscale=False, figsize=(10, 8),
     df['Value'] = series.tolist()
     df.reset_index(drop=True, inplace=True)
     fig.add_trace(go.Scatter(name="Daily Return", x=df['Date'], y=df['Value']), row=3, col=1)
+    fig.update_xaxes(tickformat="%")
+    fig.update_yaxes(tickformat="%")
     # axes[2].plot(returns * 100, color=colors[0], lw=0.5, zorder=1
     # TODO: figure out how to add horizontal lines to the subplots
     # axes[2].axhline(0, color='silver', lw=1, zorder=0)
@@ -663,6 +665,7 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
         figsize = (figsize[0] * 1.04, max([fig_height, figsize[1]]))
 
     fig = go.Figure()
+    fig.update_yaxes(tickformat="%")
     # fig, ax = _plt.subplots(figsize=figsize)
     # ax.spines['top'].set_visible(False)
     # ax.spines['right'].set_visible(False)

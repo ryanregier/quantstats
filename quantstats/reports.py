@@ -104,109 +104,109 @@ def html(returns, benchmark=None, rf=0., grayscale=False,
     tpl = tpl.replace('{{dd_info}}', _html_table(dd_info, False))
 
     # plots
-    figfile = _utils._file_stream()
-    _plots.returns(returns, benchmark, grayscale=grayscale,
-                   figsize=(8, 5), subtitle=False,
-                   savefig={'fname': figfile, 'format': figfmt},
-                   show=False, ylabel=False, cumulative=compounded)
-    tpl = tpl.replace('{{returns}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.log_returns(returns, benchmark, grayscale=grayscale,
-                       figsize=(8, 4), subtitle=False,
-                       savefig={'fname': figfile, 'format': figfmt},
-                       show=False, ylabel=False, cumulative=compounded)
-    tpl = tpl.replace('{{log_returns}}', _embed_figure(figfile, figfmt))
-
-    if benchmark is not None:
-        figfile = _utils._file_stream()
-        _plots.returns(returns, benchmark, match_volatility=True,
-                       grayscale=grayscale, figsize=(8, 4), subtitle=False,
-                       savefig={'fname': figfile, 'format': figfmt},
-                       show=False, ylabel=False, cumulative=compounded)
-        tpl = tpl.replace('{{vol_returns}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.yearly_returns(returns, benchmark, grayscale=grayscale,
-                          figsize=(8, 4), subtitle=False,
-                          savefig={'fname': figfile, 'format': figfmt},
-                          show=False, ylabel=False, compounded=compounded)
-    tpl = tpl.replace('{{eoy_returns}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.histogram(returns, grayscale=grayscale,
-                     figsize=(8, 4), subtitle=False,
-                     savefig={'fname': figfile, 'format': figfmt},
-                     show=False, ylabel=False, compounded=compounded)
-    tpl = tpl.replace('{{monthly_dist}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.daily_returns(returns, grayscale=grayscale,
-                         figsize=(8, 3), subtitle=False,
-                         savefig={'fname': figfile, 'format': figfmt},
-                         show=False, ylabel=False)
-    tpl = tpl.replace('{{daily_returns}}', _embed_figure(figfile, figfmt))
-
-    if benchmark is not None:
-        figfile = _utils._file_stream()
-        _plots.rolling_beta(returns, benchmark, grayscale=grayscale,
-                            figsize=(8, 3), subtitle=False,
-                            window1=win_year, window2=win_half_year,
-                            savefig={'fname': figfile, 'format': figfmt},
-                            show=False, ylabel=False)
-        tpl = tpl.replace('{{rolling_beta}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.rolling_volatility(returns, benchmark, grayscale=grayscale,
-                              figsize=(8, 3), subtitle=False,
-                              savefig={'fname': figfile, 'format': figfmt},
-                              show=False, ylabel=False, period=win_half_year,
-                              trading_year_days=win_year)
-    tpl = tpl.replace('{{rolling_vol}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.rolling_sharpe(returns, grayscale=grayscale,
-                          figsize=(8, 3), subtitle=False,
-                          savefig={'fname': figfile, 'format': figfmt},
-                          show=False, ylabel=False, period=win_half_year,
-                          trading_year_days=win_year)
-    tpl = tpl.replace('{{rolling_sharpe}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.rolling_sortino(returns, grayscale=grayscale,
-                           figsize=(8, 3), subtitle=False,
-                           savefig={'fname': figfile, 'format': figfmt},
-                           show=False, ylabel=False, period=win_half_year,
-                           trading_year_days=win_year)
-    tpl = tpl.replace('{{rolling_sortino}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.drawdowns_periods(returns, grayscale=grayscale,
-                             figsize=(8, 4), subtitle=False,
-                             savefig={'fname': figfile, 'format': figfmt},
-                             show=False, ylabel=False, compounded=compounded)
-    tpl = tpl.replace('{{dd_periods}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.drawdown(returns, grayscale=grayscale,
-                    figsize=(8, 3), subtitle=False,
-                    savefig={'fname': figfile, 'format': figfmt},
-                    show=False, ylabel=False)
-    tpl = tpl.replace('{{dd_plot}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.monthly_heatmap(returns, grayscale=grayscale,
-                           figsize=(8, 4), cbar=False,
-                           savefig={'fname': figfile, 'format': figfmt},
-                           show=False, ylabel=False, compounded=compounded)
-    tpl = tpl.replace('{{monthly_heatmap}}', _embed_figure(figfile, figfmt))
-
-    figfile = _utils._file_stream()
-    _plots.distribution(returns, grayscale=grayscale,
-                        figsize=(8, 4), subtitle=False,
-                        savefig={'fname': figfile, 'format': figfmt},
-                        show=False, ylabel=False, compounded=compounded)
-    tpl = tpl.replace('{{returns_dist}}', _embed_figure(figfile, figfmt))
+    # figfile = _utils._file_stream()
+    # _plots.returns(returns, benchmark, grayscale=grayscale,
+    #                figsize=(8, 5), subtitle=False,
+    #                savefig={'fname': figfile, 'format': figfmt},
+    #                show=False, ylabel=False, cumulative=compounded)
+    # tpl = tpl.replace('{{returns}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.log_returns(returns, benchmark, grayscale=grayscale,
+    #                    figsize=(8, 4), subtitle=False,
+    #                    savefig={'fname': figfile, 'format': figfmt},
+    #                    show=False, ylabel=False, cumulative=compounded)
+    # tpl = tpl.replace('{{log_returns}}', _embed_figure(figfile, figfmt))
+    #
+    # if benchmark is not None:
+    #     figfile = _utils._file_stream()
+    #     _plots.returns(returns, benchmark, match_volatility=True,
+    #                    grayscale=grayscale, figsize=(8, 4), subtitle=False,
+    #                    savefig={'fname': figfile, 'format': figfmt},
+    #                    show=False, ylabel=False, cumulative=compounded)
+    #     tpl = tpl.replace('{{vol_returns}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.yearly_returns(returns, benchmark, grayscale=grayscale,
+    #                       figsize=(8, 4), subtitle=False,
+    #                       savefig={'fname': figfile, 'format': figfmt},
+    #                       show=False, ylabel=False, compounded=compounded)
+    # tpl = tpl.replace('{{eoy_returns}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.histogram(returns, grayscale=grayscale,
+    #                  figsize=(8, 4), subtitle=False,
+    #                  savefig={'fname': figfile, 'format': figfmt},
+    #                  show=False, ylabel=False, compounded=compounded)
+    # tpl = tpl.replace('{{monthly_dist}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.daily_returns(returns, grayscale=grayscale,
+    #                      figsize=(8, 3), subtitle=False,
+    #                      savefig={'fname': figfile, 'format': figfmt},
+    #                      show=False, ylabel=False)
+    # tpl = tpl.replace('{{daily_returns}}', _embed_figure(figfile, figfmt))
+    #
+    # if benchmark is not None:
+    #     figfile = _utils._file_stream()
+    #     _plots.rolling_beta(returns, benchmark, grayscale=grayscale,
+    #                         figsize=(8, 3), subtitle=False,
+    #                         window1=win_year, window2=win_half_year,
+    #                         savefig={'fname': figfile, 'format': figfmt},
+    #                         show=False, ylabel=False)
+    #     tpl = tpl.replace('{{rolling_beta}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.rolling_volatility(returns, benchmark, grayscale=grayscale,
+    #                           figsize=(8, 3), subtitle=False,
+    #                           savefig={'fname': figfile, 'format': figfmt},
+    #                           show=False, ylabel=False, period=win_half_year,
+    #                           trading_year_days=win_year)
+    # tpl = tpl.replace('{{rolling_vol}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.rolling_sharpe(returns, grayscale=grayscale,
+    #                       figsize=(8, 3), subtitle=False,
+    #                       savefig={'fname': figfile, 'format': figfmt},
+    #                       show=False, ylabel=False, period=win_half_year,
+    #                       trading_year_days=win_year)
+    # tpl = tpl.replace('{{rolling_sharpe}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.rolling_sortino(returns, grayscale=grayscale,
+    #                        figsize=(8, 3), subtitle=False,
+    #                        savefig={'fname': figfile, 'format': figfmt},
+    #                        show=False, ylabel=False, period=win_half_year,
+    #                        trading_year_days=win_year)
+    # tpl = tpl.replace('{{rolling_sortino}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.drawdowns_periods(returns, grayscale=grayscale,
+    #                          figsize=(8, 4), subtitle=False,
+    #                          savefig={'fname': figfile, 'format': figfmt},
+    #                          show=False, ylabel=False, compounded=compounded)
+    # tpl = tpl.replace('{{dd_periods}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.drawdown(returns, grayscale=grayscale,
+    #                 figsize=(8, 3), subtitle=False,
+    #                 savefig={'fname': figfile, 'format': figfmt},
+    #                 show=False, ylabel=False)
+    # tpl = tpl.replace('{{dd_plot}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.monthly_heatmap(returns, grayscale=grayscale,
+    #                        figsize=(8, 4), cbar=False,
+    #                        savefig={'fname': figfile, 'format': figfmt},
+    #                        show=False, ylabel=False, compounded=compounded)
+    # tpl = tpl.replace('{{monthly_heatmap}}', _embed_figure(figfile, figfmt))
+    #
+    # figfile = _utils._file_stream()
+    # _plots.distribution(returns, grayscale=grayscale,
+    #                     figsize=(8, 4), subtitle=False,
+    #                     savefig={'fname': figfile, 'format': figfmt},
+    #                     show=False, ylabel=False, compounded=compounded)
+    # tpl = tpl.replace('{{returns_dist}}', _embed_figure(figfile, figfmt))
 
     tpl = _regex.sub(r'\{\{(.*?)\}\}', '', tpl)
     tpl = tpl.replace('white-space:pre;', '')
