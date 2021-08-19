@@ -116,6 +116,7 @@ def plot_returns_bars(returns, benchmark=None,
         fig.update_layout(title=title + "\n" + "\n%s - %s                   " % (
             df.index.date[:1][0].strftime('%Y'),
             df.index.date[-1:][0].strftime('%Y')))
+        fig.update_xaxes(title_text=str(df.index.date[:1][0].strftime('%Y')))
         # ax.set_title("\n%s - %s                   " % (
         #     df.index.date[:1][0].strftime('%Y'),
         #     df.index.date[-1:][0].strftime('%Y')

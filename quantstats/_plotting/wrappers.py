@@ -679,7 +679,8 @@ def monthly_heatmap(returns, annot_size=10, figsize=(10, 5),
     #              fontname=fontname, fontweight='bold', color='black')
 
     # _sns.set(font_scale=.9)
-    fig.add_trace(go.Heatmap(z=returns, colorscale=[[0.0, "rgb(165,0,38)"],
+    months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+    fig.add_trace(go.Heatmap(z=returns, x=months, colorscale=[[0.0, "rgb(165,0,38)"],
                                                     [0.1111111111111111, "rgb(215,48,39)"],
                                                     [0.2222222222222222, "rgb(244,109,67)"],
                                                     [0.3333333333333333, "rgb(253,174,97)"],
